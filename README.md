@@ -9,16 +9,3 @@ This is a simple React/Express rewrite of the original Streamlit program describ
 
 1. Place environment variables in a `.env` file as listed in `server/index.ts`.
 2. Run `npm install` to install dependencies.
-3. Build the TypeScript sources:
-
-   ```bash
-   npm run build
-   ```
-
-4. Start the server:
-
-   ```bash
-   npm start
-   ```
-
-5. Open `public/index.html` in your browser to use the chat UI.
