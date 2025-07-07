@@ -1,10 +1,14 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { AzureKeyCredential, SearchClient } from '@azure/search-documents';
-// VectorizedQuery is not typed in the version we're using
 type VectorizedQuery = any;
 import { BlobServiceClient, generateBlobSASQueryParameters, BlobSASPermissions } from '@azure/storage-blob';
 import { OpenAI } from 'openai';
+import { AzureKeyCredential, SearchClient, VectorizedQuery } from '@azure/search-documents';
+import { BlobServiceClient, generateBlobSASQueryParameters, BlobSASPermissions } from '@azure/storage-blob';
+import { OpenAI } from 'openai';
+import path from 'path';
+import { readFileSync } from 'fs';
 
 dotenv.config();
 
@@ -63,6 +67,7 @@ class AzureBlobStorageManager {
 }
 
 async function streamToBuffer(readable: NodeJS.ReadableStream | undefined | null): Promise<Buffer> {
+async function streamToBuffer(readable: NodeJS.ReadableStream | null): Promise<Buffer> {
   if (!readable) return Buffer.alloc(0);
   const chunks: any[] = [];
   for await (const chunk of readable) {
@@ -75,6 +80,9 @@ class AzureAISearcher {
   private searchClient: SearchClient<any>;
   constructor(endpoint: string, key: string, index: string) {
     this.searchClient = new SearchClient<any>(endpoint, index, new AzureKeyCredential(key));
+  private searchClient: SearchClient;
+  constructor(endpoint: string, key: string, index: string) {
+    this.searchClient = new SearchClient(endpoint, index, new AzureKeyCredential(key));
   }
 
   private async embed(text: string): Promise<number[]> {
@@ -96,6 +104,18 @@ class AzureAISearcher {
         md_path: (r as any)["md_path"],
         original_path: (r as any)["original_path"],
         score: (r as any)["@search.score"]
+    const vector = await this.embed(query);
+    const vectorQuery: VectorizedQuery = { vector, kNearestNeighbors: topK, fields: 'vector' };
+    const results = this.searchClient.search(undefined, { vectorQueries: [vectorQuery], filter: filterExpression, select: ['id','path','json_path','md_path','original_path'] });
+    const output: any[] = [];
+    for await (const r of results) {
+      output.push({
+        id: r['id'],
+        path: r['path'],
+        json_path: r['json_path'],
+        md_path: r['md_path'],
+        original_path: r['original_path'],
+        score: r['@search.score']
       });
     }
     return output;
@@ -122,6 +142,7 @@ async function getMachineList(vehicleType: string, manufacturer?: string, modelK
   });
 
   const gptVehicleType = (resp.choices[0].message.content ?? '').trim();
+  const gptVehicleType = resp.choices[0].message.content.trim();
 
   const machineData = machineJson[gptVehicleType] || [];
   const results: any[] = [];
@@ -152,6 +173,7 @@ async function multiStepChat(query: string): Promise<string> {
     model: process.env.AZURE_OPENAI_CHAT_DEPLOYMENT!
   });
   return resp.choices[0].message.content ?? '';
+  return resp.choices[0].message.content;
 }
 
 const app = express();
@@ -169,4 +191,5 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
