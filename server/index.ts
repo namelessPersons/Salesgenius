@@ -1,10 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { AzureKeyCredential, SearchClient } from '@azure/search-documents';
-// VectorizedQuery is not typed in the version we're using
-type VectorizedQuery = any;
-import { BlobServiceClient, generateBlobSASQueryParameters, BlobSASPermissions } from '@azure/storage-blob';
-import { OpenAI } from 'openai';
 
 dotenv.config();
 
@@ -169,4 +165,3 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

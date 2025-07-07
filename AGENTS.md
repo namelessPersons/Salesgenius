@@ -1,4 +1,6 @@
 以下のプログラムを、streamlitを使わず、.tsxなどのより本番に特化したプログラムで書いてください。
+docker build "salesgenius" .
+でビルドするためのdockerfileを作成してください。
 
 import os
 import sys
