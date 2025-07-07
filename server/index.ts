@@ -163,5 +163,3 @@ app.post('/api/chat', async (req, res) => {
     res.status(500).json({ error: 'Internal error' });
   }
 });
-
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
