@@ -1,0 +1,24 @@
+{
+  "name": "salesgenius",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "axios": "^1.6.8",
+    "dotenv": "^16.3.1",
+    "openai": "^4.44.0",
+    "@azure/search-documents": "^11.3.0",
+    "@azure/storage-blob": "^12.15.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.2.7",
+    "typescript": "^5.3.3"
+  }
+}
